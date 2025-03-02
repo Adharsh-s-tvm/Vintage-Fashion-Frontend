@@ -3,8 +3,11 @@ import { Container, TextField, Button, Typography, Box, Paper } from "@mui/mater
 import { Link } from "react-router-dom";
 import { CSSTransition } from "react-transition-group";
 import "../../styles/auth.css";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import axios from "axios";
 
-const SignupPage = () => {
+const UserSignUp = () => {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -39,7 +42,7 @@ const SignupPage = () => {
     );
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const { firstName, lastName, email, password, confirmPassword } = formData;
 
@@ -48,36 +51,73 @@ const SignupPage = () => {
       return;
     }
 
-    if (firstName.length < 2 || lastName.length < 2) {
-      setError("First and last name must be at least 2 characters long");
+    if (firstName.length < 2) {
+      toast.error("First name must be at least 2 characters long", { position: "top-center" });
+      return;
+    }
+
+    if (lastName.length < 1) {
+      toast.error("Last name must be at least 1 character", { position: "top-center" });
       return;
     }
 
     if (!validateEmail(email)) {
-      setError("Please enter a valid email address");
+      toast.error("Please enter a valid email address", { position: "top-center" });
       return;
     }
 
     if (!validatePassword(password)) {
-      setError(
-        "Password must be at least 8 characters long and contain uppercase, lowercase, numbers, and special characters"
+      toast.error(
+        "Password must be at least 8 characters long and contain uppercase, lowercase, numbers, and special characters", { position: "top-center" }
       );
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      toast.error("Passwords do not match", { position: "top-center" });
       return;
     }
 
-    setError("");
-    console.log("Signup Successful", formData);
+    try {
+      const signupData = {
+        firstname: firstName.trim(),
+        lastname: lastName.trim(),
+        email: email.toLowerCase(),
+        password
+      };
+
+      console.log('Sending signup data:', signupData);
+
+      const response = await axios.post("http://localhost:7000/api/signup", signupData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.data) {
+        console.log('Signup response:', response.data);
+        toast.success("Signup successful!", { position: "top-center" });
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 1500);
+
+      }
+    } catch (error) {
+      console.error('Signup error details:', {
+        message: error.response?.data?.message,
+        status: error.response?.status,
+        data: error.response?.data
+      });
+      setError(error.response?.data?.message || "An error occurred during signup");
+      toast.error(error.response?.data?.message || "Signup failed", { position: "top-center" });
+    }
   };
 
   return (
     <div className="auth-container">
       <div className="auth-side">
         <div className="auth-form-container">
+          <ToastContainer />
           <Paper
             elevation={5}
             sx={{
@@ -91,7 +131,7 @@ const SignupPage = () => {
             <Typography variant="h5" sx={{ mb: 2, color: "#684824" }}>
               User Signup
             </Typography>
-            {error && <Typography color="error">{error}</Typography>}
+            {/* {error && <Typography color="error">{error}</Typography>} */}
             <form onSubmit={handleSubmit}>
               <TextField
                 fullWidth
@@ -209,4 +249,4 @@ const SignupPage = () => {
   );
 };
 
-export default SignupPage;
+export default UserSignUp;

@@ -1,35 +1,56 @@
 import React, { useState } from "react";
 import { Container, TextField, Button, Typography, Box, Paper } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from 'react-toastify';
+import axios from 'axios';
 import { CSSTransition } from "react-transition-group";
 import "../../styles/auth.css";
+import { ToastContainer } from 'react-toastify';
 
-const LoginPage = () => {
+const UserLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email || !password) {
-      setError("Please fill in all fields");
+      toast.error("Please fill in all fields", { position: "top-center" });
       return;
     }
     if (!validateEmail(email)) {
-      setError("Please enter a valid email address");
+      toast.error("Please enter a valid email address", { position: "top-center" });
       return;
     }
     if (password.length < 8) {
-      setError("Password must be at least 8 characters long");
+      toast.error("Password must be at least 8 characters long", { position: "top-center" });
       return;
     }
-    setError("");
-    console.log("Login Successful", { email, password });
+
+    try {
+      const response = await axios.post('http://localhost:7000/api/login', {
+        email,
+        password
+      }, {
+        withCredentials: true
+      });
+
+      if (response.data) {
+        toast.success('Login successful!', { position: "top-center" });
+        localStorage.setItem('userInfo', JSON.stringify(response.data));
+        navigate('/');
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'User not registered or invalid credentials';
+      toast.error(errorMessage, { position: "top-center" });
+      setError(errorMessage);
+    }
   };
 
   return (
@@ -119,4 +140,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default UserLogin;

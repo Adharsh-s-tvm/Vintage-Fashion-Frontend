@@ -2,7 +2,7 @@ import React from "react";
 import { AppBar, Toolbar, Typography, Container, Button, Box, Paper } from "@mui/material";
 import Header from "../../components/components/Header";
 
-const HomePage = () => {
+const Home = () => {
   return (
     <Box sx={{ background: "linear-gradient(135deg, #e4e4c1, #a2906d)", minHeight: "100vh" }}>
       <Header />
@@ -45,4 +45,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default Home;
