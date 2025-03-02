@@ -1,11 +1,32 @@
 import React from "react";
 import { AppBar, Toolbar, Typography, Container, Button, Box, Paper } from "@mui/material";
 import Header from "../../components/components/Header";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Clear cookies
+    document.cookie.split(";").forEach(cookie => {
+      document.cookie = cookie
+        .replace(/^ +/, "")
+        .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+    });
+
+    // Clear localStorage
+    localStorage.clear();
+
+    // Clear sessionStorage
+    sessionStorage.clear();
+
+    // Redirect to login page
+    navigate("/login");
+  };
+
   return (
     <Box sx={{ background: "linear-gradient(135deg, #e4e4c1, #a2906d)", minHeight: "100vh" }}>
-      <Header />
+      <Header onLogout={handleLogout} />
       <Box
         sx={{
           display: "flex",
@@ -34,7 +55,7 @@ const Home = () => {
             </Typography>
             <Button
               variant="contained"
-              sx={{ backgroundColor: "#684824", "&:hover": { backgroundColor: "#856c48" } }}
+              sx={{ backgroundColor: "#684824", "&:hover": { backgroundColor: "#856c48" }, mr: 2 }}
             >
               Shop Now
             </Button>

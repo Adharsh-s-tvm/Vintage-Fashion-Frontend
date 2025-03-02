@@ -6,12 +6,17 @@ import axios from 'axios';
 import { CSSTransition } from "react-transition-group";
 import "../../styles/auth.css";
 import { ToastContainer } from 'react-toastify';
+import { useDispatch, useSelector } from 'react-redux';
+import { setUserInfo } from '../../redux/slices/authSlice';
 
 const UserLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { userInfo, isAuthenticated } = useSelector((state) => state.auth);
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -42,8 +47,9 @@ const UserLogin = () => {
       });
 
       if (response.data) {
-        toast.success('Login successful!', { position: "top-center" });
+        dispatch(setUserInfo(response.data));
         localStorage.setItem('userInfo', JSON.stringify(response.data));
+        toast.success('Login successful!', { position: "top-center" });
         navigate('/');
       }
     } catch (error) {
