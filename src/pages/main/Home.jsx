@@ -1,16 +1,11 @@
 import React from "react";
 import { AppBar, Toolbar, Typography, Container, Button, Box, Paper } from "@mui/material";
+import Header from "../../components/components/Header";
 
 const HomePage = () => {
   return (
     <Box sx={{ background: "linear-gradient(135deg, #e4e4c1, #a2906d)", minHeight: "100vh" }}>
-      <AppBar position="static" sx={{ backgroundColor: "#684824" }}>
-        <Toolbar>
-          <Typography variant="h6" sx={{ flexGrow: 1, textAlign: "center", color: "#e4e4c1" }}>
-            E-Commerce Home
-          </Typography>
-        </Toolbar>
-      </AppBar>
+      <Header />
       <Box
         sx={{
           display: "flex",
