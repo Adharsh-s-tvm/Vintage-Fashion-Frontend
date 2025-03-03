@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Container, TextField, Button, Typography, Box, Paper } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from 'react-toastify';
@@ -46,18 +46,37 @@ const UserLogin = () => {
         withCredentials: true
       });
 
+      console.log('Login response data:', response.data);
+
       if (response.data) {
-        dispatch(setUserInfo(response.data));
-        localStorage.setItem('userInfo', JSON.stringify(response.data));
+        console.log('response.data:', response.data);
+
+        const userData = {
+          name: response.data.username || `${response.data.firstname} ${response.data.lastname}`,
+          email: response.data.email,
+        };
+
+        console.log('Constructed userData:', userData);
+
+        dispatch(setUserInfo(userData));
+        localStorage.setItem('userInfo', JSON.stringify(userData));
         toast.success('Login successful!', { position: "top-center" });
         navigate('/');
       }
     } catch (error) {
+      console.error('Login error:', error.response?.data);
       const errorMessage = error.response?.data?.message || 'User not registered or invalid credentials';
       toast.error(errorMessage, { position: "top-center" });
       setError(errorMessage);
     }
   };
+  useEffect(() => {
+    if (userInfo) {
+      navigate('/');
+    } else {
+      navigate('/login');
+    }
+  }, [userInfo, navigate]);
 
   return (
     <div className="auth-container">

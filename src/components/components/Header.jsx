@@ -44,12 +44,12 @@ const Header = ({ userName, userPhoto, onLogout }) => {
         handleMenuClose();
         onLogout();
     };
-
+    console.log(userName)
     return (
         <StyledAppBar position="static">
             <StyledToolbar>
-                <Typography variant="h6" component="div">
-                    Your App Name
+                <Typography variant="h6" style={{ fontFamily: 'revert-layer' }} component="div">
+                    VINTAGE
                 </Typography>
 
                 <UserSection>

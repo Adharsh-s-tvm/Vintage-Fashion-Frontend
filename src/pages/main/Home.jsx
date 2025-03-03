@@ -1,33 +1,73 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { AppBar, Toolbar, Typography, Container, Button, Box, Paper } from "@mui/material";
 import Header from "../../components/components/Header";
 import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { clearUserInfo } from "../../redux/slices/authSlice";
+import axios from "axios";
 
 const Home = () => {
   const navigate = useNavigate();
+  const userInfo = useSelector((state) => state.auth.userInfo);
+  const dispatch = useDispatch();
 
-  const handleLogout = () => {
-    // Clear cookies
-    document.cookie.split(";").forEach(cookie => {
-      document.cookie = cookie
-        .replace(/^ +/, "")
-        .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-    });
+  // Add this debug log
+  console.log('Redux auth state:', userInfo);
 
-    // Clear localStorage
-    localStorage.clear();
+  const handleLogout = async () => {
+    try {
+      // First, call the backend logout endpoint
+      await axios.post('http://localhost:7000/api/logout', {}, {
+        withCredentials: true
+      });
 
-    // Clear sessionStorage
-    sessionStorage.clear();
+      // Clear cookies with all possible path and domain combinations
+      const cookiesToClear = ['token', 'refreshToken', 'jwt'];
+      const paths = ['/', '/api'];
+      const domains = [window.location.hostname, ''];
 
-    // Redirect to login page
-    navigate("/login");
+      cookiesToClear.forEach(cookieName => {
+        paths.forEach(path => {
+          domains.forEach(domain => {
+            document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path}${domain ? `; domain=${domain}` : ''}; secure; samesite=strict`;
+            document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path}${domain ? `; domain=${domain}` : ''}`;
+          });
+        });
+      });
+
+      // Clear Redux state
+      dispatch(clearUserInfo());
+
+      // Clear localStorage
+      localStorage.clear();
+
+      // Clear sessionStorage
+      sessionStorage.clear();
+
+      // Redirect to login page
+      navigate("/login");
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Still clear frontend state and redirect even if backend call fails
+      dispatch(clearUserInfo());
+      navigate("/login");
+    }
   };
+  const userName = userInfo?.name;
+
+  useEffect(() => {
+    if (!userInfo) {
+      navigate('/login');
+    } else {
+      navigate('/');
+    }
+  }, [userInfo, navigate]);
+
 
   return (
     <Box sx={{ background: "linear-gradient(135deg, #e4e4c1, #a2906d)", minHeight: "100vh" }}>
-      <Header onLogout={handleLogout} />
-      <Box
+      <Header onLogout={handleLogout} userName={userName} />
+      < Box
         sx={{
           display: "flex",
           justifyContent: "center",
@@ -62,7 +102,7 @@ const Home = () => {
           </Paper>
         </Container>
       </Box>
-    </Box>
+    </Box >
   );
 };
 

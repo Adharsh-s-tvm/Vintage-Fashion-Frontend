@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { Container, TextField, Button, Typography, Box, Paper } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CSSTransition } from "react-transition-group";
 import "../../styles/auth.css";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
+import { useDispatch } from 'react-redux';
+import { setUserInfo } from '../../redux/slices/authSlice';
 
 const UserSignUp = () => {
   const [formData, setFormData] = useState({
@@ -16,6 +18,8 @@ const UserSignUp = () => {
     confirmPassword: "",
   });
   const [error, setError] = useState("");
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -86,21 +90,29 @@ const UserSignUp = () => {
         password
       };
 
-      console.log('Sending signup data:', signupData);
-
       const response = await axios.post("http://localhost:7000/api/signup", signupData, {
         headers: {
           'Content-Type': 'application/json'
-        }
+        },
+        withCredentials: true  // Add this to handle cookies
       });
 
       if (response.data) {
-        console.log('Signup response:', response.data);
-        toast.success("Signup successful!", { position: "top-center" });
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 1500);
+        // Store user data in Redux and localStorage
+        const userData = {
+          name: `${response.data.firstname} ${response.data.lastname}`,
+          email: response.data.email,
+        };
 
+        dispatch(setUserInfo(userData));
+        localStorage.setItem('userInfo', JSON.stringify(userData));
+
+        toast.success("Signup successful!", { position: "top-center" });
+
+        // Navigate after a short delay to allow the toast to be seen
+        setTimeout(() => {
+          navigate('/');
+        }, 1500);
       }
     } catch (error) {
       console.error('Signup error details:', {
